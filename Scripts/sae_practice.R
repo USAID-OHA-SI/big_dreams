@@ -1,0 +1,3 @@
+library(sae)
+
+data(cornsoybeanmeans)
