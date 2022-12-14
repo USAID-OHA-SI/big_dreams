@@ -19,14 +19,6 @@
   library(ggplot2)
   library(GGally)
 
-  # # Install developmental FIESTAutils first
-  # remotes::install_github("USDAForestService/FIESTAutils",
-  #                         dependencies = TRUE)
-  # 
-  # # Then install developmental FIESTA
-  # remotes::install_github("USDAForestService/FIESTA",
-  #                         dependencies = TRUE)
-
 # GLOBAL VARIABLES ------------------------------------------------------------
   
   ref_id <- "0ffffad3"
@@ -43,9 +35,6 @@
 
 # MUNGE -----------------------------------------------------------------------
   
- # what kind of missing data do we have?
- # are data missing at random?
-  
   skim_results <- clean_df %>%skim()
   
   clean_df <- df %>%
@@ -59,7 +48,49 @@
            pregnancy, transactional, 
            sexpartners, irregular, sexviolence)
   
-  # if we can safely assume data are MAR 
+  age_pop <- clean_df %>%
+    select(country, age) %>%
+    mutate(
+      age = as.numeric(age)) %>%
+    filter(age > 14 & age < 25) %>%
+    mutate(
+      yi = sum(nrow(.)),
+      sd = sd(age), 
+      cv = raster::cv(age))
+  
+  # Do I have the data I need for a Simple area-level model
+  
+  # yi = number of agyw 15-24
+  # sd = std. dev of yi
+  # cv = coef. of var for yi
+  # SmallArea = areas of interest (ideally DSNU, likely PSNU or SNU)
+  # ni = small area sample sizes  (ideally, DSNU, likely PSNU or SNU sample sizes)
+  # MajorArea = major areas containing the smaller areas of interest (ideally, district, likely OU)
+  
+  model <- df$yi ~ as.factor(df$MajorArea)
+  
+  # Mean Squared Error estimator
+  df_fh_model_mse <- mseFH(model, df$SD^2)
+  
+  # create the dataframe with results
+  df_results_df <- data.frame(Area = df$SmallArea, 
+                                SampleSize = df$ni, 
+                                DIR = df$yi, 
+                                cv.DIR = 100 * df$CV, 
+                                eblup.FH = df_fh_model_mse$est$eblup) %>%
+    mutate(
+      # CV estimator for MSE estimator 
+      df_cv_fh = as.numeric(100 * sqrt(df_fh_model_mse$mse) / df_fh_model_mse$est$eblup)) %>%
+    arrange(-SampleSize) %>%
+    pivot_longer(cols = c(DIR, eblup.FH, cv.DIR, df_cv_fh),
+                 names_to = "estimator_type", 
+                 values_to = "value")
+  
+  # Can we use the survey response data?
+  
+  # what kind of missing data do we have?
+  # are data missing at random?
+  # if we can safely assume data are MAR (TBD!)
   # we would proceed to select which to include/impute
   
   # skim_results <- clean_df%>%
