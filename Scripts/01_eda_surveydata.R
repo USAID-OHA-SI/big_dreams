@@ -40,7 +40,6 @@
            intwt0, hivstatusfinal, agegroup, outofschool, orphanhood,
            pregnancyhistory, transactional, alcuse, sti_all,
            sexpartners, irregular, sexualviolence, adattck, eversex_1014) %>%
-    # do we have data on condom use for 15-19 yr olds or 20-24 yr olds? 
     # This is a risk factor for these groups in SA's methods and I'm not 
     # seeing it in the data
     mutate(
