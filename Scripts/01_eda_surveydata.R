@@ -19,6 +19,8 @@
   library(ggplot2)
   library(GGally)
   library(googlesheets4)
+  library(gt)
+  library(glue)
 
 # GLOBAL VARIABLES ------------------------------------------------------------
   
@@ -200,17 +202,33 @@
     filter(hivstatusfinal == 2 & 
            any_risk_1014 == 1 |
            any_risk_1519 == 1 |
-           any_risk_2024 == 1)
+           any_risk_2024 == 1) %>%
+    mutate(agegroup_text = case_when(
+      agegroup == 1 ~ "10-14", 
+      agegroup == 2 ~ "15-19", 
+      agegroup == 3 ~ "20-24"))
   
   # population most vulnerable to HIV acquisition
   
   total_AGYW_atrisk = round((nrow(total_agyw_known) - nrow(hiv_pos_agyw)) * (sum(nrow(hiv_neg_atrisk)/nrow(total_agyw_known))), 0)
   
   # 1762 
- 
-  # Correlation plot
-  # outcome = number of at-risk AGYW in DREAMS SNUs
-  # number of AGYW ages 10-24 with one or more risk factors
+  
+  # AGYW at-risk for HIV by age group
+  tabyl(hiv_neg_atrisk, agegroup_text) %>%
+    gt() %>%
+    tab_header(
+      title = "AGYW at-risk for acquiring HIV",
+      subtitle = glue("Source: Eswatini SHIMS2, 
+                       SI Analytics")) %>%
+    cols_label(
+      agegroup_text = "Age Group",
+      n = "Sample n",
+      percent = "Sample Percent") %>%
+    fmt_percent(
+      columns = percent, 
+      decimals = 1)
+
   
   
  
