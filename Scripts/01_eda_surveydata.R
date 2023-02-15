@@ -82,6 +82,15 @@
                               transactional == 1 | 
                               sexualviolence == 1 |
                               alcuse == 1), 
+                              1, 0),
+      any_risk_2529 = if_else((agegroup == 4) &
+                              (sexpartners == 1 |
+                               pregnancyhistory == 1 | 
+                               sti_all == 1 |
+                               irregular == 1 |
+                               transactional == 1 | 
+                               sexualviolence == 1 |
+                               alcuse == 1), 
                               1, 0)) 
   
   # Check for completeness of important vars
@@ -103,11 +112,7 @@
   
   # yes, most who are missing this are between ages 10-14
   # note: most who are positive are in age group 4, 25-29
-  # it looks like age is correlated with HIV status
-  
-  ggplot(total_agyw, aes(agegroup, hivstatusfinal)) +
-    geom_point()
-  
+
   # How many are missing all risk factors for their age group?
   
   missing_all_rfs <- total_agyw %>%
@@ -139,28 +144,33 @@
               is.na(sti_all) &
               is.na(sexpartners) &
               is.na(irregular) &
-              is.na(sexualviolence)))
+              is.na(sexualviolence)) |
+           (agegroup == 4) &
+             is.na(transactional) & 
+             is.na(alcuse) &
+             is.na(sti_all) &
+             is.na(sexpartners) &
+             is.na(irregular) &
+             is.na(sexualviolence))
   
-  # 857 (19%) participants missing all risk factors 
+  # 936 (21%) participants missing all risk factors 
   
   # does this vary by age?
   
   tabyl(missing_all_rfs, agegroup)
   
   # agegroup   n   percent
-  # 1         658 0.7677946
-  # 2         102 0.1190198
-  # 3          97 0.1131855
+  # 1 658 0.70299145
+  # 2 102 0.10897436
+  # 3  97 0.10363248
+  # 4  79 0.08440171
   
-  # yes, most (76%) of those missing all RFs for their age are in the 10-14 age group
+  # yes, most (70%) of those missing all RFs for their age are in the 10-14 age group
 
   # filter out those missing HIV status or all risk factors for their age
   total_agyw_known <- total_agyw %>%
     drop_na(hivstatusfinal) %>%
-    filter(!personid %in% missing_all_rfs$personid, 
-           # filtering out oldest group since i'm using SA's methods
-           # and they don't have oldest group RFs
-           agegroup != 4)
+    filter(!personid %in% missing_all_rfs$personid)
   
   hiv_pos_agyw <- total_agyw_known %>%
     filter(hivstatusfinal == 1)
@@ -195,39 +205,49 @@
     filter(agegroup == 3)
   
   hiv_pos_3 <- (nrow(hiv_pos_3)/nrow(total_agyw_3)) * 100
+  
+  # 25-29
+  
+  hiv_pos_4 <- total_agyw_known %>%
+    filter(hivstatusfinal == 1 & agegroup == 4)
+  
+  total_agyw_4 <- total_agyw_known %>%
+    filter(agegroup == 4)
+  
+  hiv_pos_4 <- (nrow(hiv_pos_4)/nrow(total_agyw_4)) * 100
           
-  # We know the HIV status of 76% of our sample, is this stil a sufficient sample?
+  # We know the HIV status of 58% of our sample, is this still a sufficient sample?
   
   hiv_neg_atrisk <- total_agyw_known %>%
     filter(hivstatusfinal == 2 & 
            any_risk_1014 == 1 |
            any_risk_1519 == 1 |
-           any_risk_2024 == 1) %>%
+           any_risk_2024 == 1 |
+           any_risk_2529 == 1) %>%
     mutate(agegroup_text = case_when(
       agegroup == 1 ~ "10-14", 
       agegroup == 2 ~ "15-19", 
-      agegroup == 3 ~ "20-24"))
+      agegroup == 3 ~ "20-24", 
+      agegroup == 4 ~ "25-29"))
   
   # population most vulnerable to HIV acquisition
   
   total_AGYW_atrisk = round((nrow(total_agyw_known) - nrow(hiv_pos_agyw)) * (sum(nrow(hiv_neg_atrisk)/nrow(total_agyw_known))), 0)
   
-  # 1762 
+  # 2396
   
   # AGYW at-risk for HIV by age group
-  tabyl(hiv_neg_atrisk, agegroup_text) %>%
+  tabyl(hiv_neg_atrisk, region, agegroup_text) %>%
+    adorn_percentages("row") %>%
+    adorn_pct_formatting() %>%
+    adorn_ns() %>%
     gt() %>%
     tab_header(
       title = "AGYW at-risk for acquiring HIV",
       subtitle = glue("Source: Eswatini SHIMS2, 
                        SI Analytics")) %>%
-    cols_label(
-      agegroup_text = "Age Group",
-      n = "Sample n",
-      percent = "Sample Percent") %>%
-    fmt_percent(
-      columns = percent, 
-      decimals = 1)
+    cols_label( 
+      region = "Region")
 
   
   
