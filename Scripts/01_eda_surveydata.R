@@ -4,7 +4,7 @@
 # REF ID:   0ffffad3 
 # LICENSE:  MIT
 # DATE:     2022-12-08
-# UPDATED:  2023-01-04
+# UPDATED:  2023-02-15
 
 # DEPENDENCIES ----------------------------------------------------------------
   
@@ -113,9 +113,10 @@
   # yes, most who are missing this are between ages 10-14
   # note: most who are positive are in age group 4, 25-29
 
-  # How many are missing all risk factors for their age group?
+  # How many AGYW are missing all risk factors for their age group? ------------
   
   missing_all_rfs <- total_agyw %>%
+    # 10-14
     filter((agegroup == 1 &
                is.na(outofschool) & 
                is.na(orphanhood) & 
@@ -128,6 +129,7 @@
                is.na(sexualviolence) &
                is.na(adattck) &
                is.na(eversex_1014)) |
+    # 15-19
             (agegroup == 2 & 
               is.na(outofschool) & 
               is.na(orphanhood) & 
@@ -138,6 +140,7 @@
               is.na(sexpartners) &
               is.na(irregular) &
               is.na(sexualviolence)) |
+    # 25-29
            (agegroup == 3 &
               is.na(transactional) & 
               is.na(alcuse) &
@@ -168,12 +171,17 @@
   # yes, most (70%) of those missing all RFs for their age are in the 10-14 age group
 
   # filter out those missing HIV status or all risk factors for their age
+  # to do a "complete case analysis"
   total_agyw_known <- total_agyw %>%
     drop_na(hivstatusfinal) %>%
     filter(!personid %in% missing_all_rfs$personid)
   
+  # How many HIV+ AGYW are in our sample? --------------------------------------
+  
   hiv_pos_agyw <- total_agyw_known %>%
     filter(hivstatusfinal == 1)
+  
+  # What is the HIV positivity/prevalence in our sample overall and by age group? -----
   
   # overall
   hiv_pos_overall <- (nrow(hiv_pos_agyw)/nrow(total_agyw_known)) * 100
@@ -216,7 +224,10 @@
   
   hiv_pos_4 <- (nrow(hiv_pos_4)/nrow(total_agyw_4)) * 100
           
-  # We know the HIV status of 58% of our sample, is this still a sufficient sample?
+  # We know the HIV status of 58% of our sample, 
+  # is this still a sufficient sample?
+  
+  # Calculate the number of HIV- AGYW at risk ----------------------------------
   
   hiv_neg_atrisk <- total_agyw_known %>%
     filter(hivstatusfinal == 2 & 
@@ -230,22 +241,29 @@
       agegroup == 3 ~ "20-24", 
       agegroup == 4 ~ "25-29"))
   
-  # population most vulnerable to HIV acquisition
+  # Calculate population most vulnerable to HIV acquisition --------------------
   
-  total_AGYW_atrisk = round((nrow(total_agyw_known) - nrow(hiv_pos_agyw)) * (sum(nrow(hiv_neg_atrisk)/nrow(total_agyw_known))), 0)
+  total_AGYW_atrisk = round((nrow(total_agyw_known) - 
+                               nrow(hiv_pos_agyw)) * 
+                              (sum(nrow(hiv_neg_atrisk)/nrow(total_agyw_known))), 0)
   
   # 2396
   
-  # AGYW at-risk for HIV by age group
+  # AGYW at-risk for HIV by age group formatted table --------------------------
   tabyl(hiv_neg_atrisk, region, agegroup_text) %>%
+    # add row percentages
     adorn_percentages("row") %>%
+    # add percentage formatting
     adorn_pct_formatting() %>%
+    # add sample size in parens. for each percentage
     adorn_ns() %>%
     gt() %>%
+    # add custom title
     tab_header(
       title = "AGYW at-risk for acquiring HIV",
       subtitle = glue("Source: Eswatini SHIMS2, 
                        SI Analytics")) %>%
+    # relabel columns nicely
     cols_label( 
       region = "Region")
 
