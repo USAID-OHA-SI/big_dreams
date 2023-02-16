@@ -242,17 +242,29 @@
       agegroup == 4 ~ "25-29"))
   
   # Calculate population most vulnerable to HIV acquisition --------------------
-  
+
+  # total overall 
   total_AGYW_atrisk = round((nrow(total_agyw_known) - 
                                nrow(hiv_pos_agyw)) * 
                               (sum(nrow(hiv_neg_atrisk)/nrow(total_agyw_known))), 0)
   
-  # 2396
+  # by age group and region
+  regional_n_at_risk <- hiv_neg_atrisk %>%
+    group_by(region, agegroup, agegroup_text) %>%
+    summarise(across(starts_with("any_risk"), sum, na.rm = TRUE)) %>%
+    mutate(
+      n = case_when(
+        agegroup == 1~any_risk_1014,
+        agegroup == 2~any_risk_1519,
+        agegroup == 3~any_risk_2024,
+        agegroup == 4~any_risk_2529)) %>%
+    ungroup() %>%
+    select(region, agegroup_text, n)
   
   # AGYW at-risk for HIV by age group formatted table --------------------------
-  tabyl(hiv_neg_atrisk, region, agegroup_text) %>%
+  regional_n_at_risk %>%
     # add row percentages
-    adorn_percentages("row") %>%
+    adorn_percentages("col") %>%
     # add percentage formatting
     adorn_pct_formatting() %>%
     # add sample size in parens. for each percentage
@@ -261,11 +273,12 @@
     # add custom title
     tab_header(
       title = "AGYW at-risk for acquiring HIV",
-      subtitle = glue("Source: Eswatini SHIMS2, 
-                       SI Analytics")) %>%
+      subtitle = "By Region and Age Group") %>%
+    tab_footnote("Source: Eswatini SHIMS2 | SI Analytics") %>%
     # relabel columns nicely
     cols_label( 
-      region = "Region")
+      region = "Region", 
+      agegroup_text = "Age Group")
 
   
   
