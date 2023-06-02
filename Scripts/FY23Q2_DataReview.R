@@ -56,6 +56,52 @@ df_filt_prep <- df %>%
   adorn_achievement() %>%
   arrange(period)
 
+# CES services provided in FY23 Q2
+
+df_filt_cesprov <- df %>%
+  clean_indicator() %>%
+  clean_agency() %>%
+  filter(fiscal_year == "2023",
+         standardizeddisaggregate == "ComprehensiveEconomicStrengthening") %>%
+  group_by(fiscal_year, operatingunit) %>%
+  summarise((across(qtr2,\(x) sum(x, na.rm = TRUE)))) %>%
+  arrange(operatingunit)
+
+# number of DSNUs reporting CES - denominator of pct
+# /total number of districts in each OU in CES
+
+# df_filt_ces <- df %>%
+#   clean_indicator() %>%
+#   clean_agency() %>%
+#   filter(fiscal_year == "2023",
+#          standardizeddisaggregate %in% c("ComprehensiveEconomicStrengthening",
+#                                          "EducationSupport",
+#                                          "ViolencePrevention")) %>%
+#   group_by(fiscal_year, operatingunit, dsnu) %>%
+#   count() %>%
+#   group_by(fiscal_year, operatingunit) %>%
+#   summarise(dsnus_reporting_servicetype = sum(n))
+
+# number of dsnus per ou reporting providing CES in Q2 - numerator of pct
+# of districts who reported CES in FY23Q2
+
+# df_filt_cesprov <- df %>%
+#   clean_indicator() %>%
+#   clean_agency() %>%
+#   filter(fiscal_year == "2023",
+#          standardizeddisaggregate == "ComprehensiveEconomicStrengthening") %>%
+#   group_by(fiscal_year, operatingunit, dsnu) %>%
+#   count() %>%
+#   group_by(fiscal_year, operatingunit) %>%
+#   summarise(dsnus_reporting_ces = sum(n))
+
+# combine
+
+# df_pct_ces <- df_filt_cesprov %>%
+#   left_join(df_filt_ces, by = c("fiscal_year", "operatingunit")) %>%
+#   mutate(pct_reporting_ces = dsnus_reporting_ces/dsnus_reporting_servicetype)
+# 
+
 # visual -----------------------------------------------------------------------
 
 # What does the quarterly achievement for PrEP_NEW look like by agency in 
