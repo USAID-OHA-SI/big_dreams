@@ -319,7 +319,7 @@ library(janitor)
   
   # Counting the number of DREAMS SNUs
   
-  # globally
+  # Globally
   
   df_summ_global <- df_msd %>%
     clean_indicator() %>%
@@ -335,7 +335,6 @@ library(janitor)
   
   # by Agency
   
-  
   df_summ_agency <- df_msd %>%
     clean_indicator() %>%
     clean_agency() %>%
@@ -348,12 +347,11 @@ library(janitor)
     count(dsnu) %>%
     ungroup() %>%
     group_by(funding_agency) %>%
-    reframe(n_dsnus = sum(n))
-  
+    reframe(n_dsnus = sum(n)) %>%
+    mutate(pct_contribution_agency = percent(n_dsnus/df_summ_global$n_dsnus))
   
   # for POART visuals
   
-
   df_prev <- prep_hiv_prev_DREAMS(df = df_nat, cntry = cntry) %>%
     filter(fiscal_year %in% c("2022", "2023"))
   
