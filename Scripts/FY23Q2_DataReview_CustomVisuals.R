@@ -25,6 +25,7 @@ library(janitor)
 # GLOBAL VARS ------------------------------------------------------------------
 
   cntry <- "Eswatini"
+  # cntry <- "Zimbabwe"
   
   ref_id <- "dcd3c23a"
   
@@ -316,7 +317,42 @@ library(janitor)
   
 # MUNGE ------------------------------------------------------------------------
   
+  # Counting the number of DREAMS SNUs
+  
+  # globally
+  
+  df_summ_global <- df_msd %>%
+    clean_indicator() %>%
+    # in 2023, reported Q2 data
+    filter(fiscal_year == "2023", 
+           is.na(qtr2) == FALSE) %>%
+    group_by(operatingunit, dsnu) %>%
+    select(operatingunit, dsnu) %>%
+    distinct() %>%
+    count(dsnu) %>%
+    ungroup() %>%
+    reframe(n_dsnus = sum(n))
+  
+  # by Agency
+  
+  
+  df_summ_agency <- df_msd %>%
+    clean_indicator() %>%
+    clean_agency() %>%
+    # in 2023, reported Q2 data
+    filter(fiscal_year == "2023", 
+           is.na(qtr2) == FALSE) %>%
+    group_by(funding_agency, operatingunit, dsnu) %>%
+    select(funding_agency, operatingunit, dsnu) %>%
+    distinct() %>%
+    count(dsnu) %>%
+    ungroup() %>%
+    group_by(funding_agency) %>%
+    reframe(n_dsnus = sum(n))
+  
+  
   # for POART visuals
+  
 
   df_prev <- prep_hiv_prev_DREAMS(df = df_nat, cntry = cntry) %>%
     filter(fiscal_year %in% c("2022", "2023"))
