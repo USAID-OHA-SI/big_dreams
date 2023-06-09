@@ -1,14 +1,16 @@
 # PROJECT:  big_dreams
 # AUTHOR:   J.Hoehner | USAID
 # PURPOSE:  reproduce DREAMS COP visuals with a 
-#           different age group (15-24) for FY23 Q2 data review
+#           different age group (15-24) for FY23 Q2 data review + update
+#           a visual from the DREAMS Quarterly workbook
 # REF ID:   dcd3c23a
 # LICENSE:  MIT
-# DATE:     2023-06-07
+# DATE:     2023-06-09
 
 # DEPENDENCIES -----------------------------------------------------------------
 
 library(tidyverse)
+library(readr)
 library(gagglr)
 library(glue)
 library(scales)
@@ -23,6 +25,8 @@ library(janitor)
 # GLOBAL VARS ------------------------------------------------------------------
 
   cntry <- "Eswatini"
+  
+  ref_id <- "dcd3c23a"
   
 # FUNCTIONS --------------------------------------------------------------------
   
@@ -308,7 +312,11 @@ library(janitor)
   metadata_msd <- metadata
   rm(metadata)
   
+  df_tableau <- readxl::read_excel(here::here("Data/FY23Q2_DREAMSPrimaryPackageCompletion.xlsx"))
+  
 # MUNGE ------------------------------------------------------------------------
+  
+  # for POART visuals
 
   df_prev <- prep_hiv_prev_DREAMS(df = df_nat, cntry = cntry) %>%
     filter(fiscal_year %in% c("2022", "2023"))
@@ -316,6 +324,41 @@ library(janitor)
   df_vl <- prep_viral_load_kp_agyw(df = df_msd, 
                                    cntry = cntry, agency = "USAID") %>%
     filter(fiscal_year %in% c("2022", "2023"))
+  
+  # for edited Tableau visual from DREAMS Primary Package Completion tab
+  
+  df_ppc <- df_tableau %>%
+    clean_names() %>%
+    rename(ou = x1, 
+           completion = x2, 
+           pct = percent_contribution_along_standardized_disaggregate_2_levels) %>%
+    # fix ou col
+    fill(ou) %>%
+    filter(completion == "Primary Package Completed") %>%
+    add_row(
+      ou = "Cote d'Ivoire*", 
+      completion = "Primary Package Completed",
+      cumulative = 0, 
+      pct = 0) %>%
+    add_row(
+      ou = "South Sudan*", 
+      completion = "Primary Package Completed",
+      cumulative = 0, 
+      pct = 0) %>%
+    group_by(ou, completion) %>%
+    # create color grouping by percent completion
+    mutate(
+      cumul_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(cumulative)}"), 
+      cumul_lab = if_else(cumul_lab == "5.5", "5", cumul_lab),
+      color_cat = case_when(
+        pct == 0 ~ 1,
+        pct > 0 & pct < 0.25 ~ 2,
+        pct > 0.25 & pct < .65 | pct == .65   ~ 3, 
+        pct > 0.65 & pct < .89 | pct == .89 ~ 4, 
+        pct > 0.9 | pct == 0.9 ~ 5), 
+      pct_lab = if_else(pct > 0.9, 
+                          glue::glue("{scales::percent(pct, 2)}"), 
+                          glue::glue("")))
 
 # VIZ --------------------------------------------------------------------------
 
@@ -326,3 +369,33 @@ library(janitor)
   viz_viral_load_kp_agyw(df_vl)
   
   si_save(glue("Images/VLC_VLS_gaps_AGYW_ABYW_15_24_{cntry}.png"))
+  
+  df_ppc %>%
+    ggplot(aes(x = pct, y = fct_reorder(ou, pct), 
+               group = color_cat, fill = color_cat)) +
+    geom_col() +
+    geom_text(aes(label = pct_lab), hjust = -0.25,
+              family = "Gill Sans MT", fontface = "bold", 
+              color = "#001b0e", size = 4.5) +
+    geom_text(aes(label = cumul_lab), hjust = 2.5,
+              family = "Gill Sans MT", 
+              color = "#D3D3D3", size = 4.5) +
+    geom_vline(xintercept = 0.9, linetype = "dashed", color = "#D3D3D3") +
+    scale_fill_si("genoas", alpha = 0.7) +
+    si_style_xline() +
+    scale_x_continuous(labels = scales::percent, name = NULL, 
+                       limits = c(0,1.0), 
+                       breaks = seq(0,1.1, by = .25),
+                       oob = oob_squish) + 
+    labs(x = NULL, y = NULL,
+         caption = glue("Note: *Data were not reported from South Sudan or Cote d'Ivoire
+         Source: DREAMS Quarterly Workbook Data Download from Primary Package Completion 13+ Months tab, FY23Q2c
+          USAID/OHA/SIEI | Ref id: {ref_id}")) +
+    si_style_xline() +
+    theme(axis.text = element_text(family = "Gill Sans MT", 
+                       color = usaid_darkgrey, size = 14),
+          legend.position = "none",
+          strip.text = element_markdown(),
+          panel.spacing = unit(.5, "picas"))
+  
+  si_save(glue("Images/AGYW_percent_primary_completion_{today()}.png"))
