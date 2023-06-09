@@ -1,10 +1,10 @@
 # PROJECT:  big_dreams
 # AUTHOR:   J.Hoehner | USAID
-# PURPOSE:  FY23 Q2 data review: 
-#           Replacing PrEP calc for FY22 Data Review spreadsheet
+# PURPOSE:  FY23 Q2 data review visuals made in addition to those from DREAMS and 
+#           CI Tableau dashboards
 # REF ID:   890ae9f5
 # LICENSE:  GPL v3 +
-# DATE:     2023-06-02
+# DATE:     2023-06-09
 # UPDATED:
 
 # DEPENDENCIES ----------------------------------------------------------------
@@ -298,7 +298,6 @@ date <- today()
 
 # import -----------------------------------------------------------------------
 
-# SI specific paths/functions
 load_secrets()
 
 df_nat <- si_path() %>% 
@@ -493,6 +492,33 @@ df_pct_ces <- left_join(df_ndsnus,df_nces) %>%
                       glue::glue("{scales::percent(pct, 1)}"), 
                       glue::glue("")), 
     operatingunit = if_else(pct == 0, glue("{operatingunit}*"), operatingunit))
+
+# Education Services 
+
+df_filt_eduprov <- df_msd %>%
+  clean_indicator() %>%
+  filter(fiscal_year == "2023",
+         standardizeddisaggregate == "EducationSupport") %>%
+  group_by(fiscal_year, operatingunit) %>%
+  summarise((across(qtr2,\(x) sum(x, na.rm = TRUE)))) %>%
+  arrange(operatingunit) %>%
+  ungroup() %>%
+  add_row(
+    fiscal_year = 2023,
+    operatingunit = "Botswana*", 
+    qtr2 = 0) %>%
+  add_row(
+    fiscal_year = 2023,
+    operatingunit = "South Sudan*", 
+    qtr2 = 0) %>%
+  mutate(
+    qtr_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(qtr2)}"), 
+    qtr_lab = if_else(qtr2 > 20000, qtr_lab, glue::glue("")),
+    color_cat = case_when(
+      qtr2 < 200 ~ 1,
+      qtr2 > 200 & qtr2 < 10000 ~ 2,
+      qtr2 > 1000 & qtr2 < 20000 | qtr2 == 20000   ~ 3, 
+      qtr2 > 20000 ~ 5))
   
 # visualize --------------------------------------------------------------------
 
@@ -613,4 +639,27 @@ df_ppc %>%
         strip.text = element_markdown(),
         panel.spacing = unit(.5, "picas"))
 
-si_save(glue("Images/AGYW_percent_primary_completion_{date}.png"))         
+si_save(glue("Images/AGYW_percent_primary_completion_{date}.png"))      
+
+# How many education services were provided?
+
+df_filt_eduprov %>%
+  filter(operatingunit != "Kenya") %>%
+  ggplot(aes(y = forcats::fct_reorder(operatingunit, qtr2), x = qtr2)) +
+  geom_col(aes(group = color_cat, fill = color_cat),position = position_dodge(width = .65)) +
+  geom_text(aes(label = qtr_lab), hjust = 1.5, family = "Gill Sans MT", 
+            color = "#D3D3D3", size = 4.5) +
+  scale_x_continuous(label = label_number(scale_cut = cut_short_scale())) +
+  scale_fill_si("golden_sands", alpha = 0.7) +
+  labs(x = NULL, y = NULL,
+       caption = glue("Note: *These OUs did not report any data for this service type for this period. 
+                      Data reported from Kenya has been excluded as an outlier.
+                      Source: FY23Q2 MSD | USAID/OHA/SIEI | Ref id: {ref_id}")) +
+  si_style_xline() +
+  theme(axis.text = element_text(family = "Gill Sans MT", 
+                                 color = usaid_darkgrey, size = 14),
+        legend.position = "none",
+        strip.text = element_markdown(),
+        panel.spacing = unit(.5, "picas"))
+
+si_save(glue("Images/FY23Q2_EDUbyOU_{date}.png"))
