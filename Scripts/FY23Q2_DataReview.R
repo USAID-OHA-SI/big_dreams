@@ -290,8 +290,7 @@ viz_viral_load_kp_agyw <- function(df){
 
 # global vars -----------------------------------------------------------------
 
-cntry <- "Eswatini"
-# cntry <- "Zimbabwe"
+cntry <- "Zimbabwe"
 
 ref_id <- "890ae9f5"
 date <- today()
@@ -320,7 +319,7 @@ df_tableau <- readxl::read_excel(here::here("Data/FY23Q2_DREAMSPrimaryPackageCom
 
 # MUNGE ------------------------------------------------------------------------
 
-# Counting the number of DREAMS SNUs
+# Counting the number of DREAMS SNUs ------------
 
 # Globally
 
@@ -336,7 +335,8 @@ df_summ_global <- df_msd %>%
   ungroup() %>%
   reframe(n_dsnus = sum(n))
 
-# by Agency
+# by Agency - check with KM on this as it does not distinguish between 
+# SNUs which are suported by multiple agencies
 
 df_summ_agency <- df_msd %>%
   clean_indicator() %>%
@@ -353,7 +353,7 @@ df_summ_agency <- df_msd %>%
   reframe(n_dsnus = sum(n)) %>%
   mutate(pct_contribution_agency = percent(n_dsnus/df_summ_global$n_dsnus))
 
-# for POART visuals
+# for POART visuals --------------
 
 df_prev <- prep_hiv_prev_DREAMS(df = df_nat, cntry = cntry) %>%
   filter(fiscal_year %in% c("2022", "2023"))
@@ -362,7 +362,7 @@ df_vl <- prep_viral_load_kp_agyw(df = df_msd,
                                  cntry = cntry, agency = "USAID") %>%
   filter(fiscal_year %in% c("2022", "2023"))
 
-# for edited Tableau visual from DREAMS Primary Package Completion tab
+# for edited Tableau visual from DREAMS Primary Package Completion tab -----
 
 df_ppc <- df_tableau %>%
   clean_names() %>%
@@ -387,18 +387,14 @@ df_ppc <- df_tableau %>%
   mutate(
     cumul_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(cumulative)}"), 
     cumul_lab = if_else(cumul_lab == "5.5", "5", cumul_lab),
-    color_cat = case_when(
-      pct == 0 ~ 1,
-      pct > 0 & pct < 0.25 ~ 2,
-      pct > 0.25 & pct < .65 | pct == .65   ~ 3, 
-      pct > 0.65 & pct < .89 | pct == .89 ~ 4, 
-      pct > 0.9 | pct == 0.9 ~ 5), 
+    color_cat = if_else(pct < 0.9, 1, 2), 
     pct_lab = if_else(pct > 0.9, 
                       glue::glue("{scales::percent(pct, 2)}"), 
                       glue::glue("")))
 
 
-# quarterly achievement for PrEP_NEW
+# quarterly achievement for PrEP_NEW ----
+# hold for DREAMS deep dive
 df_filt_prep <- df_msd %>%
   clean_indicator() %>%
   clean_agency() %>%
@@ -417,7 +413,7 @@ df_filt_prep <- df_msd %>%
     color_cat = if_else(period == metadata_msd$curr_pd,
                         glue("{funding_agency}_{period}"), glue("{funding_agency}")))
 
-# CES services provided in FY23 Q2
+# CES services provided in FY23 Q2 -----
 
 df_filt_cesprov <- df_msd %>%
   clean_indicator() %>%
@@ -443,11 +439,7 @@ df_filt_cesprov <- df_msd %>%
   mutate(
     qtr_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(qtr2)}"), 
     qtr_lab = if_else(qtr2 > 20000, qtr_lab, glue::glue("")),
-    color_cat = case_when(
-      qtr2 < 200 ~ 1,
-      qtr2 > 200 & qtr2 < 10000 ~ 2,
-      qtr2 > 1000 & qtr2 < 20000 | qtr2 == 20000   ~ 3, 
-      qtr2 > 20000 ~ 5))
+    color_cat = if_else(qtr2 < 20000, 1, 2))
 
 # number of DSNUs in each OU who reported data for FY23Q2
 
@@ -478,22 +470,19 @@ df_nces <- df_msd %>%
   group_by(operatingunit) %>%
   reframe(n_dsnus_ces = sum(n))
 
+# df for viz
+
 df_pct_ces <- left_join(df_ndsnus,df_nces) %>%
   mutate(
     pct = n_dsnus_ces/n_dsnus, 
     pct = if_else(is.na(pct), 0, pct),
-    color_cat = case_when(
-      pct == 0 ~ 1,
-      pct > 0 & pct < 0.25 ~ 2,
-      pct > 0.25 & pct < .75 | pct == .75   ~ 3, 
-      pct > 0.75 & pct < 1 ~ 4, 
-      pct == 1 ~ 5),
+    color_cat = if_else(pct < 1, 2, 1),
     pct_lab = if_else(pct != 1 & pct != 0, 
                       glue::glue("{scales::percent(pct, 1)}"), 
                       glue::glue("")), 
     operatingunit = if_else(pct == 0, glue("{operatingunit}*"), operatingunit))
 
-# Education Services 
+# Education Services ----
 
 df_filt_eduprov <- df_msd %>%
   clean_indicator() %>%
@@ -514,11 +503,7 @@ df_filt_eduprov <- df_msd %>%
   mutate(
     qtr_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(qtr2)}"), 
     qtr_lab = if_else(qtr2 > 20000, qtr_lab, glue::glue("")),
-    color_cat = case_when(
-      qtr2 < 200 ~ 1,
-      qtr2 > 200 & qtr2 < 10000 ~ 2,
-      qtr2 > 1000 & qtr2 < 20000 | qtr2 == 20000   ~ 3, 
-      qtr2 > 20000 ~ 5))
+    color_cat = if_else(qtr2 < 20000, 1, 2))
   
 # visualize --------------------------------------------------------------------
 
@@ -563,7 +548,7 @@ df_filt_cesprov %>%
   ggplot(aes(y = forcats::fct_reorder(operatingunit, qtr2), x = qtr2)) +
   geom_col(aes(group = color_cat, fill = color_cat),position = position_dodge(width = .65)) +
   geom_text(aes(label = qtr_lab), hjust = 1.5, family = "Gill Sans MT", 
-            color = "#D3D3D3", size = 4.5) +
+            color = "#FFFFFF", size = 4.5) +
   scale_x_continuous(label = label_number(scale_cut = cut_short_scale())) +
   scale_fill_si("moody_blues", alpha = 0.7) +
   labs(x = NULL, y = NULL,
@@ -585,7 +570,7 @@ df_pct_ces %>%
   ggplot(aes(y = forcats::fct_reorder(operatingunit, -pct), x = pct)) +
   geom_col(aes(group = color_cat, fill = color_cat), position = position_dodge(width = .65)) +
   geom_text(aes(label = pct_lab), hjust = 1.5, family = "Gill Sans MT", 
-            color = "#D3D3D3", size = 4.5) +
+            color = "#FFFFFF", size = 4.5) +
   scale_x_continuous(labels = scales::percent, name = NULL, 
                      limits = c(0,1.1), 
                      breaks = seq(0,1.1, by = .25),
