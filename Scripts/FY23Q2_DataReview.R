@@ -139,7 +139,7 @@ viz_hiv_prev_DREAMS <- function(df, save = F) {
          title = {q},
          # updated subtitle to reflect age band 15-24 instead of 10-24
          subtitle = glue::glue("{unique(df$country)} HIV prevalence gap between <span style='color:{genoa}'>ABYM</span> & <span style='color:{moody_blue}'>AGYW</span> ages 15-24"),
-         caption = glue::glue("{cap_note}{metadata_natsubnat$source} | USAID/OHA/SIEI |  Ref id: {ref_id} v{vrsn}")) +
+         caption = glue::glue("{cap_note}{metadata_natsubnat$source} | USAID DREAMS & SI|  Ref id: {ref_id} v{vrsn}")) +
     si_style_nolines() +
     theme(plot.subtitle = element_markdown(),
           axis.text.y = element_markdown())
@@ -280,7 +280,7 @@ viz_viral_load_kp_agyw <- function(df){
     labs(x = NULL, y = NULL,
          title = {q},
          subtitle = glue("{unique(df$period)} {unique(df$funding_agency)}/{unique(df$country)} VLC/S gaps between different population groups"),
-         caption = glue("Note: VL capped at 110% {cap_note}{metadata_msd$caption} | USAID/OHA/SIEI | Ref id: {ref_id} v{vrsn}")) +
+         caption = glue("Note: VL capped at 110% {cap_note}{metadata_msd$caption} | USAID DREAMS & SI| Ref id: {ref_id} v{vrsn}")) +
     si_style_xline() +
     theme(legend.position = "none",
           strip.text = element_markdown(),
@@ -385,8 +385,9 @@ df_ppc <- df_tableau %>%
   group_by(ou, completion) %>%
   # create color grouping by percent completion
   mutate(
-    cumul_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(cumulative)}"), 
-    cumul_lab = if_else(cumul_lab == "5.5", "5", cumul_lab),
+    cumul_lab = if_else(pct > 0.9 | pct == .9, 
+                        glue("{label_number(1.1, scale_cut = cut_short_scale())(cumulative)}"),
+                        ""),
     color_cat = if_else(pct < 0.9, 1, 2), 
     pct_lab = if_else(pct > 0.9, 
                       glue::glue("{scales::percent(pct, 2)}"), 
@@ -554,7 +555,7 @@ df_filt_cesprov %>%
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
                       Data reported from Kenya has been excluded as an outlier.
-                      Source: FY23Q2 MSD | USAID/OHA/SIEI | Ref id: {ref_id}")) +
+                      Source: FY23Q2 MSD | USAID DREAMS & SI| Ref id: {ref_id}")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
@@ -579,7 +580,7 @@ df_pct_ces %>%
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type this period. 
                       Data reported from Kenya has been excluded as an outlier.
-                      Source: FY23Q2 MSD | USAID/OHA/SIEI | Ref id: {ref_id}")) +
+                      Source: FY23Q2 MSD | USAID DREAMS & SI| Ref id: {ref_id}")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
@@ -606,7 +607,7 @@ df_ppc %>%
             color = "#001b0e", size = 4.5) +
   geom_text(aes(label = cumul_lab), hjust = 2.5,
             family = "Gill Sans MT", 
-            color = "#D3D3D3", size = 4.5) +
+            color = "#FFFFFF", size = 4.5) +
   geom_vline(xintercept = 0.9, linetype = "dashed", color = "#D3D3D3") +
   scale_fill_si("genoas", alpha = 0.7) +
   si_style_xline() +
@@ -615,9 +616,10 @@ df_ppc %>%
                      breaks = seq(0,1.1, by = .25),
                      oob = oob_squish) + 
   labs(x = NULL, y = NULL,
-       caption = glue("Note: *Data were not reported from South Sudan or Cote d'Ivoire
+       caption = glue("Note: *Data were not reported from South Sudan or Cote d'Ivoire, 
+                              Numbers on bars show the number of AGYW in DREAMS for 13+ months in each OU
          Source: DREAMS Quarterly Workbook Data Download from Primary Package Completion 13+ Months tab, FY23Q2c
-          USAID/OHA/SIEI | Ref id: {ref_id}")) +
+          USAID DREAMS & SI| Ref id: {ref_id}")) +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
         legend.position = "none",
@@ -633,13 +635,14 @@ df_filt_eduprov %>%
   ggplot(aes(y = forcats::fct_reorder(operatingunit, qtr2), x = qtr2)) +
   geom_col(aes(group = color_cat, fill = color_cat),position = position_dodge(width = .65)) +
   geom_text(aes(label = qtr_lab), hjust = 1.5, family = "Gill Sans MT", 
-            color = "#D3D3D3", size = 4.5) +
+            color = "#FFFFFF", size = 4.5) +
   scale_x_continuous(label = label_number(scale_cut = cut_short_scale())) +
-  scale_fill_si("golden_sands", alpha = 0.7) +
+  scale_fill_si("old_roses", alpha = 0.7) +
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
                       Data reported from Kenya has been excluded as an outlier.
-                      Source: FY23Q2 MSD | USAID/OHA/SIEI | Ref id: {ref_id}")) +
+                      Numbers on bars show the number of AGYW who received educational services by OU
+                      Source: FY23Q2 MSD | USAID DREAMS & SI| Ref id: {ref_id}")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
