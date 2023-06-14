@@ -547,15 +547,15 @@ si_save(glue("Images/FY23Q2_PrEPAgencyComparison_{date}.png"))
 df_filt_cesprov %>%
   filter(operatingunit != "Kenya") %>%
   ggplot(aes(y = forcats::fct_reorder(operatingunit, qtr2), x = qtr2)) +
-  geom_col(aes(group = color_cat, fill = color_cat),position = position_dodge(width = .65)) +
+  geom_col(aes(group = as.factor(color_cat), fill = as.factor(color_cat)),position = position_dodge(width = .65)) +
   geom_text(aes(label = qtr_lab), hjust = 1.5, family = "Gill Sans MT", 
             color = "#FFFFFF", size = 4.5) +
   scale_x_continuous(label = label_number(scale_cut = cut_short_scale())) +
-  scale_fill_si("moody_blues", alpha = 0.7) +
+  scale_fill_manual(values = c("#9e94e0", "#000a45")) +
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
                       Data reported from Kenya has been excluded as an outlier.
-                      Source: FY23Q2 MSD | USAID DREAMS & SI| Ref id: {ref_id}")) +
+                      Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
@@ -569,18 +569,18 @@ si_save(glue("Images/FY23Q2_CESbyOU_{date}.png"))
 df_pct_ces %>%
   filter(operatingunit != "Kenya") %>%
   ggplot(aes(y = forcats::fct_reorder(operatingunit, -pct), x = pct)) +
-  geom_col(aes(group = color_cat, fill = color_cat), position = position_dodge(width = .65)) +
+  geom_col(aes(group = as.factor(color_cat), fill = as.factor(color_cat)), position = position_dodge(width = .65)) +
   geom_text(aes(label = pct_lab), hjust = 1.5, family = "Gill Sans MT", 
             color = "#FFFFFF", size = 4.5) +
   scale_x_continuous(labels = scales::percent, name = NULL, 
                      limits = c(0,1.1), 
                      breaks = seq(0,1.1, by = .25),
                      oob = oob_squish) + 
-  scale_fill_si("moody_blues", alpha = 0.7) +
+  scale_fill_manual(values = c("#9e94e0", "#000a45")) +
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type this period. 
                       Data reported from Kenya has been excluded as an outlier.
-                      Source: FY23Q2 MSD | USAID DREAMS & SI| Ref id: {ref_id}")) +
+                      Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
@@ -600,7 +600,7 @@ si_save(glue("Images/VLC_VLS_gaps_AGYW_ABYW_15_24_{cntry}_{date}.png"))
 
 df_ppc %>%
   ggplot(aes(x = pct, y = fct_reorder(ou, pct), 
-             group = color_cat, fill = color_cat)) +
+             group = as.factor(color_cat), fill = as.factor(color_cat))) +
   geom_col() +
   geom_text(aes(label = pct_lab), hjust = -0.25,
             family = "Gill Sans MT", fontface = "bold", 
@@ -609,7 +609,7 @@ df_ppc %>%
             family = "Gill Sans MT", 
             color = "#FFFFFF", size = 4.5) +
   geom_vline(xintercept = 0.9, linetype = "dashed", color = "#D3D3D3") +
-  scale_fill_si("genoas", alpha = 0.7) +
+  scale_fill_manual(values = c("#5cac9e", "#001b0e")) +
   si_style_xline() +
   scale_x_continuous(labels = scales::percent, name = NULL, 
                      limits = c(0,1.0), 
@@ -618,8 +618,8 @@ df_ppc %>%
   labs(x = NULL, y = NULL,
        caption = glue("Note: *Data were not reported from South Sudan or Cote d'Ivoire, 
                               Numbers on bars show the number of AGYW in DREAMS for 13+ months in each OU
-         Source: DREAMS Quarterly Workbook Data Download from Primary Package Completion 13+ Months tab, FY23Q2c
-          USAID DREAMS & SI| Ref id: {ref_id}")) +
+         Source: DREAMS Quarterly Workbook Data Download from Primary Package Completion 13+ Months tab, FY23Q2i
+          USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
         legend.position = "none",
@@ -633,16 +633,17 @@ si_save(glue("Images/AGYW_percent_primary_completion_{date}.png"))
 df_filt_eduprov %>%
   filter(operatingunit != "Kenya") %>%
   ggplot(aes(y = forcats::fct_reorder(operatingunit, qtr2), x = qtr2)) +
-  geom_col(aes(group = color_cat, fill = color_cat),position = position_dodge(width = .65)) +
+  geom_col(aes(group = as.factor(color_cat), fill = as.factor(color_cat)),
+           position = position_dodge(width = .65)) +
   geom_text(aes(label = qtr_lab), hjust = 1.5, family = "Gill Sans MT", 
             color = "#FFFFFF", size = 4.5) +
   scale_x_continuous(label = label_number(scale_cut = cut_short_scale())) +
-  scale_fill_si("old_roses", alpha = 0.7) +
+  scale_fill_manual(values = c("#fc7a83", "#480000")) +
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
                       Data reported from Kenya has been excluded as an outlier.
                       Numbers on bars show the number of AGYW who received educational services by OU
-                      Source: FY23Q2 MSD | USAID DREAMS & SI| Ref id: {ref_id}")) +
+                      Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
