@@ -319,40 +319,6 @@ df_tableau <- readxl::read_excel(here::here("Data/FY23Q2_DREAMSPrimaryPackageCom
 
 # MUNGE ------------------------------------------------------------------------
 
-# Counting the number of DREAMS SNUs ------------
-
-# Globally
-
-df_summ_global <- df_msd %>%
-  clean_indicator() %>%
-  # in 2023, reported Q2 data
-  filter(fiscal_year == "2023", 
-         is.na(qtr2) == FALSE) %>%
-  group_by(operatingunit, dsnu) %>%
-  select(operatingunit, dsnu) %>%
-  distinct() %>%
-  count(dsnu) %>%
-  ungroup() %>%
-  reframe(n_dsnus = sum(n))
-
-# by Agency - check with KM on this as it does not distinguish between 
-# SNUs which are suported by multiple agencies
-
-df_summ_agency <- df_msd %>%
-  clean_indicator() %>%
-  clean_agency() %>%
-  # in 2023, reported Q2 data
-  filter(fiscal_year == "2023", 
-         is.na(qtr2) == FALSE) %>%
-  group_by(funding_agency, operatingunit, dsnu) %>%
-  select(funding_agency, operatingunit, dsnu) %>%
-  distinct() %>%
-  count(dsnu) %>%
-  ungroup() %>%
-  group_by(funding_agency) %>%
-  reframe(n_dsnus = sum(n)) %>%
-  mutate(pct_contribution_agency = percent(n_dsnus/df_summ_global$n_dsnus))
-
 # for POART visuals --------------
 
 df_prev <- prep_hiv_prev_DREAMS(df = df_nat, cntry = cntry) %>%
@@ -616,10 +582,11 @@ df_ppc %>%
                      breaks = seq(0,1.1, by = .25),
                      oob = oob_squish) + 
   labs(x = NULL, y = NULL,
-       caption = glue("Note: *Data were not reported from South Sudan or Cote d'Ivoire, 
-                              Numbers on bars show the number of AGYW in DREAMS for 13+ months in each OU
-         Source: DREAMS Quarterly Workbook Data Download from Primary Package Completion 13+ Months tab, FY23Q2i
-          USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
+       caption = glue("Note: *AGYW are females ages 10-24
+                             **Data were not reported from South Sudan or Cote d'Ivoire, 
+                               Numbers on bars show the number of AGYW in DREAMS for 13+ months in each OU
+         Source: DREAMS Quarterly Workbook Data Download from Primary Package Completion 13+ Months tab, FY23Q2c
+          USAID DREAMS & SI | Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
         legend.position = "none",
