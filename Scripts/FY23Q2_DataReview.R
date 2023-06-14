@@ -34,6 +34,7 @@ prep_hiv_prev_DREAMS <- function(df, cntry) {
   
   ## PSNU/Age/Sex Summaries
   df_pops <- df %>% 
+    clean_indicator() %>%
     dplyr::filter(country == cntry, 
                   indicator %in% c("PLHIV", "POP_EST"),
                   # removing ages 10-14 as requested
@@ -82,6 +83,7 @@ prep_hiv_prev_DREAMS <- function(df, cntry) {
   
   return(df_prev)
 }
+
 viz_hiv_prev_DREAMS <- function(df, save = F) {
   
   q <- glue::glue("Are there clear HIV prevalence gaps by AGYW/ABYM?") %>% toupper
@@ -161,6 +163,7 @@ prep_viral_load_kp_agyw <- function(df, cntry, agency){
   
   #filter to select indicators + country
   df_vl <- df %>%  
+     clean_indicator() %>%
     filter(indicator %in% c("TX_CURR", "TX_PVLS", "TX_PVLS_D"),
            country == cntry,
            funding_agency == agency) %>%
@@ -201,6 +204,7 @@ prep_viral_load_kp_agyw <- function(df, cntry, agency){
   
   #subtract KP from GP (Total)
   df_vl <- df_vl %>%
+    clean_indicator() %>%
     mutate(GenPop = Total - KeyPop,
            GenPop = ifelse(GenPop < 0, 0, GenPop)) %>% 
     select(-Total) %>% 
@@ -339,12 +343,12 @@ df_ppc <- df_tableau %>%
   fill(ou) %>%
   filter(completion == "Primary Package Completed") %>%
   add_row(
-    ou = "Cote d'Ivoire*", 
+    ou = "Cote d'Ivoire**", 
     completion = "Primary Package Completed",
     cumulative = 0, 
     pct = 0) %>%
   add_row(
-    ou = "South Sudan*", 
+    ou = "South Sudan**", 
     completion = "Primary Package Completed",
     cumulative = 0, 
     pct = 0) %>%
