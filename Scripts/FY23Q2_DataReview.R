@@ -4,7 +4,7 @@
 #           CI Tableau dashboards
 # REF ID:   890ae9f5
 # LICENSE:  GPL v3 +
-# DATE:     2023-06-09
+# DATE:     2023-06-15
 # UPDATED:
 
 # DEPENDENCIES ----------------------------------------------------------------
@@ -472,6 +472,10 @@ df_filt_eduprov <- df_msd %>%
     fiscal_year = 2023,
     operatingunit = "South Sudan*", 
     qtr2 = 0) %>%
+  add_row(
+    fiscal_year = 2023,
+    operatingunit = "South Africa*", 
+    qtr2 = 0) %>%
   mutate(
     qtr_lab = glue("{label_number(1.1, scale_cut = cut_short_scale())(qtr2)}"), 
     qtr_lab = if_else(qtr2 > 20000, qtr_lab, glue::glue("")),
@@ -525,7 +529,9 @@ df_filt_cesprov %>%
   scale_fill_manual(values = c("#9e94e0", "#000a45")) +
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
-                      Data reported from Kenya has been excluded as an outlier.
+                      Data reported from Kenya (289,9883) has been excluded as an outlier.
+                      Figure shows all active DREAMS participants who have started or completed any 
+                      DREAMS service/intervention as of the end of the reporting period (AGYW_PREV denominator) in PEPFAR
                       Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
@@ -613,7 +619,7 @@ df_filt_eduprov %>%
   scale_fill_manual(values = c("#fc7a83", "#480000")) +
   labs(x = NULL, y = NULL,
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
-                      Data reported from Kenya has been excluded as an outlier.
+                      Data reported from Kenya (113,581) has been excluded as an outlier.
                       Numbers on bars show the number of AGYW who received educational services by OU
                       Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
