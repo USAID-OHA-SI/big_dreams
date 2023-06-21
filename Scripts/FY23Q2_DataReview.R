@@ -532,7 +532,7 @@ df_filt_cesprov %>%
                       Data reported from Kenya (289,9883) has been excluded as an outlier.
                       Figure shows all active DREAMS participants who have started or completed any 
                       DREAMS service/intervention as of the end of the reporting period (AGYW_PREV denominator) in PEPFAR
-                      Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
+                      Source: FY23Q2c MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
@@ -621,7 +621,7 @@ df_filt_eduprov %>%
        caption = glue("Note: *These OUs did not report any data for this service type for this period. 
                       Data reported from Kenya (113,581) has been excluded as an outlier.
                       Numbers on bars show the number of AGYW who received educational services by OU
-                      Source: FY23Q2i MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
+                      Source: FY23Q2c MSD | USAID DREAMS & SI| Ref id: {ref_id}| Created using FY23Q2_DataReview.R")) +
   si_style_xline() +
   theme(axis.text = element_text(family = "Gill Sans MT", 
                                  color = usaid_darkgrey, size = 14),
