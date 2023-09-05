@@ -1,6 +1,6 @@
 # PROJECT:  big_dreams
 # AUTHOR:   J.Hoehner | USAID
-# PURPOSE:  FY23 Q2 requets to pull total number of makes 18-49 who have either 
+# PURPOSE:  FY23 Q2 request to pull total number of makes 18-49 who have either 
 #           been reached by DREAMS_GEND_NORM or violence prevention activities in 
 #           FY22 Q1-Q3
 # REF ID:   371be9e6

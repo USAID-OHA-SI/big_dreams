@@ -35,11 +35,6 @@
   
   # Cumulative
   
-  # qtrs_to_keep <- metadata$curr_pd %>%
-  #   convert_qtr_to_date() %>%
-  #   seq.Date(by = "-3 months", length = 6) %>%
-  #   convert_date_to_qtr()
-  
   df_cum <- df %>%
     filter(
       indicator == "AGYW_PREV",

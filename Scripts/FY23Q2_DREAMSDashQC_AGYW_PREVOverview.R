@@ -79,29 +79,3 @@ df_recent %>%
            standardizeddisaggregate == "Age/Sex/Time/Complete" ~ "DREAMS AGYW who completed the primary package but not a secondary service",
            standardizeddisaggregate == "Age/Sex/Time/Complete+" ~ "DREAMS AGYW who completed the primary package and at least one secondary service")) %>%
   select(period, std_disagg_label, value)
-
-# DREAMS Indicator Results and Target Achievements for AGYW in DREAMS districts -
-# View by : OU
-# Operatingunit: (All)
-# Funding Agency (All)
-# Fiscal Year: 2023
-# Age Band: (Multiple Values)
-# Dsnu: (All)
-# Mech Name1: (All)
-
-pg2 <- df_recent %>%
-  filter(indicator %in% c("GEND_GBV", "OVC_SERV", "PMTCT_STAT", 
-                          "PP_PREV", "PrEP_CT", "PrEP_NEW")
-         #ageasentered %in% c("10-14", "15-19", "20-24")
-  ) %>%
-  clean_indicator() %>%
-  clean_agency() %>%
-  group_by(fiscal_year, operatingunit, dsnu, ageasentered, 
-           indicator, standardizeddisaggregate, mech_name, prime_partner_name) %>%
-  summarise(across(starts_with("qtr"), \(x) sum(x, na.rm = TRUE))) %>%
-  reshape_msd(include_type = FALSE) %>%
-  pivot_wider(
-    names_from = indicator,
-    names_glue = "{tolower(indicator)}") %>%
-  filter(period == metadata$curr_pd)
-
