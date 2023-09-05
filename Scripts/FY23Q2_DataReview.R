@@ -4,7 +4,7 @@
 #           CI Tableau dashboards
 # REF ID:   890ae9f5
 # LICENSE:  GPL v3 +
-# DATE:     2023-06-15
+# DATE:     2023-07-25
 # UPDATED:
 
 # DEPENDENCIES ----------------------------------------------------------------
@@ -380,10 +380,7 @@ df_filt_prep <- df_msd %>%
                     \(x) sum(x, na.rm = TRUE)))) %>%
   reshape_msd(direction = "quarters", include_type = FALSE) %>%
   adorn_achievement() %>%
-  arrange(period) %>%
-  mutate(
-    color_cat = if_else(period == metadata_msd$curr_pd,
-                        glue("{funding_agency}_{period}"), glue("{funding_agency}")))
+  arrange(period) 
 
 # CES services provided in FY23 Q2 -----
 
@@ -490,7 +487,7 @@ df_filt_prep %>%
   ggplot(aes(x = period)) +
   geom_col(aes(y = targets), alpha = 0.5, fill = usaid_lightgrey,
            position = position_dodge(width = .65)) +
-  geom_col(aes(y = results_cumulative, alpha = .9, fill = color_cat),
+  geom_col(aes(y = results_cumulative, alpha = .9, fill = funding_agency),
            position = position_dodge(width = .65)) +
   facet_wrap(~funding_agency) +
   geom_text(aes(label = glue("{percent(achievement_qtrly)}"), y = 0),
@@ -499,9 +496,7 @@ df_filt_prep %>%
             vjust = -.5, na.rm = TRUE) +
   scale_x_discrete(breaks = unique(df_filt_prep$period)[grep("Q(2|4)", unique(df_filt_prep$period))]) +
   scale_fill_manual(values = c("USAID" = usaid_medblue,
-                               "CDC" = scooter_med, 
-                               "USAID_FY23Q2" = usaid_blue, 
-                               "CDC_FY23Q2" = scooter)) +
+                               "CDC" = scooter_med)) +
   scale_y_continuous(label = label_number(scale_cut = cut_short_scale())) +
   labs(
     x = NULL, y = NULL, fill = NULL, group = NULL,
