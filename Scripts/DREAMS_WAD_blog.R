@@ -56,21 +56,27 @@ viz1_USAID<- viz_package %>%
   filter(str_detect(agencies_FY23, "USAID")) %>% 
   summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop")
 
-# Can use this code to check #s by country or DSNU against the DREAMS dashboard for Q2 since
-# it we are still working to get all country data to match
+# Can use these codes code to check #s by country or DSNU against the DREAMS dashboard for Q2 
 #viz1_USAID<- viz_package %>%
-  #filter(str_detect(agencies_FY23, "USAID"), operatingunit=="South Africa") %>% 
+  #filter(operatingunit=="Tanzania") %>% 
+  #filter(str_detect(agencies_FY23, "USAID"), operatingunit=="Tanzania") %>% 
   #group_by(dsnu) %>% 
+  # OR
   #filter(str_detect(agencies_FY23, "USAID")) %>% 
   #group_by(operatingunit) %>% 
   #summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop") %>% 
   #arrange() %>% print()
 
 
-# NOTES: Botswana, Eswatini, Haiti, Namibia, Rwanda, South Africa, 
-# South Sudan, Zimbabwe match 
-# Cote & Kenya & Malawi & Tanzania match once DSNUs in switched
-# Uganda, Lesotho still outstanding on our end
+# NOTES: 
+# Uganda & Lesotho still outstanding on our end
+# Botswana, Eswatini, Haiti, Namibia, Rwanda, South Africa, 
+# South Sudan, Zimbabwe match dashboard
+# Cote & Kenya & Malawi & Tanzania match when DSNUs are switched (looks like the dashboard
+# is using a slightly out of date list, so would need to download and check/uncheck filter)
+# Something odd w/ one non-USAID DSNU in TZ (Tunduma MC in spreadsheet but missing in MSD) - 
+# doesn't change result for FY23
+
 
 ##### VISUAL 2 #####################
 
