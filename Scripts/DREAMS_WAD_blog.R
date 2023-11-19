@@ -11,7 +11,7 @@ library(gophr)
 library(readxl)
 
 
-file_path <-"C:/Users/npetrovic/Documents/Data/Other/DREAMS_DSNU_by_Agency.xlsx"
+file_path <-"C:/Users/npetrovic/Documents/Data/Other/DREAMS DSNU by Agency.xlsx"
 dsnu_list <- read_excel(file_path, sheet="CURRENT (FY23COP22)") 
 names(dsnu_list)<-c("operatingunit", "psnu", "dsnu", "agencies_FY23")
 
@@ -51,24 +51,26 @@ viz_prep <- df %>% filter(indicator=="PrEP_NEW",
 viz1_all <- viz_package %>% 
               summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop")
 
-# Can use this code to check #s by country against the DREAMS dashboard for Q2 since
-# it we are still working to get all country data to match
-# group_by(operatingunit) %>% 
-#  summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop") %>% print()
-
-# NOTES: Botswana, Eswatini, Rwanda, South Africa, South Sudan, Zimbabwe match  
-# Cote & Kenya match once you switch the DSNU that changed
-# Malawi doesn't due to error that needs to be fixed in DSNU sheet
-# Namibia - close to matching (nukundu issue)
-# Tanzania does not (due to minor issue)
-# Uganda, Lesotho, Haiti still outstanding on our end
-
-
 ## Now filter for USAID only numbers
 viz1_USAID<- viz_package %>%
   filter(str_detect(agencies_FY23, "USAID")) %>% 
   summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop")
 
+# Can use this code to check #s by country or DSNU against the DREAMS dashboard for Q2 since
+# it we are still working to get all country data to match
+#viz1_USAID<- viz_package %>%
+  #filter(str_detect(agencies_FY23, "USAID"), operatingunit=="South Africa") %>% 
+  #group_by(dsnu) %>% 
+  #filter(str_detect(agencies_FY23, "USAID")) %>% 
+  #group_by(operatingunit) %>% 
+  #summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop") %>% 
+  #arrange() %>% print()
+
+
+# NOTES: Botswana, Eswatini, Haiti, Namibia, Rwanda, South Africa, 
+# South Sudan, Zimbabwe match 
+# Cote & Kenya & Malawi & Tanzania match once DSNUs in switched
+# Uganda, Lesotho still outstanding on our end
 
 ##### VISUAL 2 #####################
 
@@ -92,14 +94,6 @@ viz2_prep <- viz_prep %>% filter(str_detect(agencies_FY23, "USAID")) %>%
              summarize(across(cumulative, \(x) sum(x, na.rm = TRUE)),.groups="drop") %>% print()
 
 
-### TESTING #####
-#dlist<-unique(dsnu_list$dsnu)
-#msdlist<-unique(df_orig$dsnu)
-#setdiff(dlist, msdlist)
-#setdiff(msdlist, dlist)
 
-## Temeke MC is TZ and looks like it is not a USAID district
-## Uganda issues: "Lira City", "Kampala District","Kayunga District","Masaka City"        
-## ["Mbarara City","Fort Portal City","Gulu City" -- all Uganda 
 
 
