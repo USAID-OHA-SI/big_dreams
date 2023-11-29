@@ -81,11 +81,15 @@
                                 TRUE ~ dsnu),
            dsnuuid_new = case_when(operatingunit != "Uganda" & raised_lvl == TRUE ~ cop22_psnuuid,
                                    TRUE ~ dsnuuid))
+  
+  msd_dsnu_xwalk <- msd_dsnu_xwalk %>% 
+    left_join(dsnu_list, by=c("operatingunit", "cop22_psnu" = "psnu", "dsnu_new"= "dsnu")) %>% 
+    filter(str_detect(agencies_FY23, "USAID"))
   # shape files ----------------------------------------------------------
   
   # Load the shapefiles to grab boundaries from below
   spdf_pepfar <- get_vcpolygons(path = shpdata, name = "VcPepfarPolygons.shp")
-  cntry <- "Lesotho"
+  cntry <- "Swaziland"
   
   adm0 <- gisr::get_admin0(cntry)
   adm1 <- gisr::get_admin1(cntry)
@@ -99,7 +103,7 @@
       level = lvl,
       username = datim_user(),
       password = datim_pwd()) %>% 
-      mutate(org_level = cntry_lvl)
+      mutate(org_level = lvl)
     
     # filter spdf
     spdf_cntry <- spdf_pepfar %>%
@@ -147,9 +151,8 @@
   map(dreams_countries, ~ si_save(paste0("Graphics/", .x, "_map.svg"), plot_map(.x)))
   map(dreams_countries, ~ si_save(paste0("Images/", .x, "_map.png"), plot_map(.x)))
   
-  
   plot_map("Lesotho")  
-  plot_map("Eswatini")  
+  plot_map("Eswatini")  #add footnote to map about the Ikhundala regions
   plot_map("Zambia") 
   plot_map("Namibia")
  
