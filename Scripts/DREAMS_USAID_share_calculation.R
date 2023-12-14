@@ -4,7 +4,6 @@
 # LICENSE:  MIT
 # DATE:     2023-11-20
 # UPDATED: 
-# TEST
 
 # DEPENDENCIES ------------------------------------------------------------
   
@@ -81,8 +80,6 @@ df_join <- df_msd %>%
   left_join(msd_dsnu_xwalk) %>% 
   left_join(dsnu_list, by=c("operatingunit", "cop22_psnu" = "psnu", "dsnu_new"= "dsnu"))
 
-#crosswalk
-df_join %>% count(operatingunit, cop22_psnu, psnu, dsnu, dsnu_new) %>% View()
   
 # MUNGE FOR VIZ -------------------------------------------------------------------
 
